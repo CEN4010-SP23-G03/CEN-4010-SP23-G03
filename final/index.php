@@ -237,7 +237,7 @@
 
             $query = "user:all"
             $b64 = base64_encode(json_encode($rows));
-            echo "<script>process_sql('$b64', '$query'";
+            echo "<script>process_sql('$b64', '$query');</script>";
         }
         ?>
     </body>
