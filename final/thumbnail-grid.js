@@ -8,7 +8,8 @@ function set_thumbnail_callbacks_and_populate_tag_list(tags_arr, tags_set)
         console.log("thumbnail grid whitespace clicked");
         let taglist = $("#the-tag-list");
         taglist.html("");
-        taglist.foreach(function(value)
+
+        tags_set.foreach(function(value)
         {
             taglist.append(
                 `
@@ -16,6 +17,8 @@ function set_thumbnail_callbacks_and_populate_tag_list(tags_arr, tags_set)
                 `
             );
         });
+
+        
         
     });
     

@@ -170,15 +170,25 @@
 
                 // get sha256 hash of image found at url and filename based on url
                 $image_sha256 = hash('sha256', file_get_contents($image_url)); // seems to return the same value each time
-                if (!$db->execute_query('INSERT INTO images (user_id, image_hash, url, tags) VALUES (?, ?, ?, ?)', [$userid, $image_sha256, $image_url, $image_tags]))
-                {
-                    echo 'Error when inserting: ' . mysqli_error($db);
-                }
+                //if (!$db->execute_query('INSERT INTO images (user_id, image_hash, url, tags) VALUES (?, ?, ?, ?)', [$userid, $image_sha256, $image_url, $image_tags]))
+                //{
+                //    echo 'Error when inserting: ' . mysqli_error($db);
+                //}
+
+                $stmt = $db->prepare('INSERT INTO images (user_id, image_hash, url, tags) VALUES (?, ?, ?, ?)');
+                $stmt->bind_param('isss', $userid, $image_sha256, $image_url, $image_tags);
+                $stmt->execute();
+                
                 
                 // get image from DB for display to the user and call js funcs
-                $result = $db->execute_query('SELECT * FROM images WHERE user_id = ? AND WHERE url = ?', [$userid, $image_url]);
+                //$result = $db->execute_query('SELECT * FROM images WHERE user_id = ? AND WHERE url = ?', [$userid, $image_url]);
+
+                $stmt = $db->prepare('SELECT * FROM images WHERE user_id = ? AND WHERE url = ?');
+                $stmt->bind_param('is', $userid, $image_url);
+                $stmt->execute();
+                $result = $stmt->get_result();
                 $rows = array();
-                while($row = mysqli_fetch_assoc($result)) { $rows[] = $row; }
+                while($row = $result->fetch_assoc()) { $rows[] = $row; }
                 if (!$rows) { echo "<script>console.log('rows php variable was empty!');</script>"; }
 
                 $query = "url:" . $image_url;
@@ -198,7 +208,10 @@
 
                 $userid = $_SESSION["user_id"];
                 $image_url = $_POST["manage_imageurl_input"];
-                $result = $db->execute_query('DELETE FROM images WHERE url = ?', [$image_url]);
+
+                $stmt = $db->prepare('DELETE FROM images WHERE url = ?');
+                $stmt->bind_param('s', $image_url);
+                $stmt->execute();
 
                 // todo: show delete success notif
 
@@ -214,11 +227,13 @@
 
                 $userid = $_SESSION["user_id"];
                 $query = $_POST["searchbox"];
-            
-                // todo
-                $result = $db->execute_query('SELECT * FROM images WHERE user_id = ? AND tags LIKE %?%', [$userid, $query]);
+
+                $stmt = $db->prepare('SELECT * FROM images WHERE user_id = ? AND tags LIKE %?%');
+                $stmt->bind_param('is', $userid, $query);
+                $stmt->execute();
+                $result = $stmt->get_result();
                 $rows = array();
-                while($row = mysqli_fetch_assoc($result)) { $rows[] = $row; }
+                while($row = $result->fetch_assoc()) { $rows[] = $row; }
                 if (!$rows) { echo "<script>console.log('rows php variable was empty!');</script>"; }
     
                 $b64 = base64_encode(json_encode($rows));
@@ -230,12 +245,15 @@
             // populate thumbnail grid with first 15 entries of user's saved images - also populate tag list
             $userid = $_SESSION["user_id"];
 
-            $result = $db->execute_query('SELECT * FROM images WHERE user_id = ? LIMIT 15', [$userid]);
+            $stmt = $db->prepare('SELECT * FROM images WHERE user_id = ? LIMIT 15');
+            $stmt->bind_param('i', $userid);
+            $stmt->execute();
+            $result = $stmt->get_result();
             $rows = array();
-            while($row = mysqli_fetch_assoc($result)) { $rows[] = $row; }
+            while($row = $result->fetch_assoc()) { $rows[] = $row; }
             if (!$rows) { echo "<script>console.log('rows php variable was empty!');</script>"; }
 
-            $query = "user:all"
+            $query = "user:all";
             $b64 = base64_encode(json_encode($rows));
             echo "<script>process_sql('$b64', '$query');</script>";
         }
