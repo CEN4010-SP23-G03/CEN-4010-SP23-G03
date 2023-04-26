@@ -28,18 +28,24 @@
 
     </head>
     <body>
-        <?php session_start(); ?>
+        <?php 
+        session_start();
+        $db_host = "localhost";
+        $db_username = "cen4010sp23g03";
+        $db_password = "ASpring#2023";
+        $db_name = "cen4010sp23g03";
+        $db = mysqli_connect($db_host, $db_username, $db_password, $db_name);
+        if (!$db) { die("No connection to MySQL database!" . mysqli_connect_error()); }
+        ?>
         <!-- top area -->
         <nav class="navbar navbar-expand-lg fixed-top navbar-light bg-light">
             <div class="container-fluid">
                 <a class="navbar-brand" href="#">
                     <img src="logo.png" alt="Overview logo" height="50" class="d-inline-block align-text-top">
                 </a>
-
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-
                 <div class="collapse navbar-collapse" id="navbarNavDropdown">
                     <form>
                         <div class="input-group">
@@ -47,18 +53,25 @@
                             <ul class="navbar-nav">
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        Username
+                                        <?php
+                                        if (isset($_SESSION["user_id"]))
+                                        {
+                                            $userid = $_SESSION["user_id"];
+                                            $stmt = $db->prepare("SELECT username FROM user_accounts WHERE user_id = '$userid'");
+                                            $stmt->execute();
+                                            $results = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+                                            echo $results["username"];
+                                        }
+                                        ?>
                                     </a>
                                     <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                                        <li><a class="dropdown-item" href="#">Action</a></li>
-                                        <li><a class="dropdown-item" href="#">Another action</a></li>
-                                        <li><a class="dropdown-item" href="#">Something else here</a></li>
+                                        <li><a class="dropdown-item" data-bs-toggle="modal" data-bs-target="#save-new-image-modal" href="#">Save New Image</a></li>
+                                        <li><a class="dropdown-item" href="logout.php">Logout</a></li>
                                     </ul>
                                 </li>
                             </ul>
                         </div>
                     </form>
-                    
                     <div class="container">
                         <form class="mx-auto" id="search-form" method="post" action="index.php">
                             <div class="input-group">
@@ -68,17 +81,8 @@
                         </form>
                     </div>
                 </div>
-
-                
-                
-
-            
-            
             </div>
-            
         </nav>
-
-
 
         <!-- former top area -->
 
@@ -228,13 +232,6 @@
 
         <!-- php -->
         <?php
-        session_start();
-        $db_host = "localhost";
-        $db_username = "cen4010sp23g03";
-        $db_password = "ASpring#2023";
-        $db_name = "cen4010sp23g03";
-        $db = mysqli_connect($db_host, $db_username, $db_password, $db_name);
-        if (!$db) { die("No connection to MySQL database!" . mysqli_connect_error()); }
         if($_SERVER["REQUEST_METHOD"] == "POST")
         {
             if ($_POST["imageurl_input"] && $_POST["imagetags_input"])
@@ -291,48 +288,45 @@
 
                 $userid = $_SESSION["user_id"];
                 $query = $_POST["searchbox"];
-
-                $prefix = substr($query, 0, 3);
-                $logical_operation = "AND";
-                if($prefix == "OR:")
+                $b64 = "";
+                if ($query == "user:all")
                 {
-                    $logical_operation = "OR";
-                    $query = substr($query, 3);
+                    $stmt = $db->prepare('SELECT * FROM images WHERE user_id = '$userid' LIMIT 15');
+                    $stmt->execute();
+                    $results = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+                    $b64 = base64_encode(json_encode($results));                    
                 }
-                
-                $substrings = explode(",", $query);
-                $sql = "SELECT * FROM images WHERE user_id = '$userid' AND ";
-                $placeholders = "";
-                foreach($substrings as $substring)
+                else
                 {
-                    $placeholders .= "tags LIKE CONCAT('%', ?, '%') " . $logical_operation . " ";
-                }
-                $placeholders = rtrim($placeholders, " " . $logical_operation . " ");
-                $sql .= $placeholders;
-                $stmt = $db->prepare($sql);
-
-                $bind_params = array(str_repeat("s", count($substrings)));
-                foreach($substrings as $index => $substring) {
-                    $bind_params[] = &$substrings[$index];
-                }
-                call_user_func_array(array($stmt, 'bind_param'), $bind_params);
-                
-                $stmt->execute();
-                $results = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-
-                
-
-                
-                //$querysql = "%" . $query . "%";
-                //$stmt = $db->prepare('SELECT * FROM images WHERE user_id = ? AND tags LIKE ?');
-                //$stmt->bind_param('is', $userid, $querysql);
-                //$stmt->execute();
-                //$result = $stmt->get_result();
-                //$rows = array();
-                //while($row = $result->fetch_assoc()) { $rows[] = $row; }
-                //if (!$rows) { echo "<script>console.log('rows php variable was empty!');</script>"; }
+                    $prefix = substr($query, 0, 3);
+                    $logical_operation = "AND";
+                    if($prefix == "OR:")
+                    {
+                        $logical_operation = "OR";
+                        $query = substr($query, 3);
+                    }
+                    
+                    $substrings = explode(",", $query);
+                    $sql = "SELECT * FROM images WHERE user_id = '$userid' AND ";
+                    $placeholders = "";
+                    foreach($substrings as $substring)
+                    {
+                        $placeholders .= "tags LIKE CONCAT('%', ?, '%') " . $logical_operation . " ";
+                    }
+                    $placeholders = rtrim($placeholders, " " . $logical_operation . " ");
+                    $sql .= $placeholders;
+                    $stmt = $db->prepare($sql);
     
-                $b64 = base64_encode(json_encode($results));
+                    $bind_params = array(str_repeat("s", count($substrings)));
+                    foreach($substrings as $index => $substring) {
+                        $bind_params[] = &$substrings[$index];
+                    }
+                    call_user_func_array(array($stmt, 'bind_param'), $bind_params);
+                    
+                    $stmt->execute();
+                    $results = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+                    $b64 = base64_encode(json_encode($results));
+                }
                 echo "<script>process_sql('$b64', '$query');</script>";
             }   
         }
