@@ -297,10 +297,11 @@
                 if($prefix == "OR:")
                 {
                     $logical_operation = "OR";
+                    $query = substr($query, 3);
                 }
                 
                 $substrings = explode(",", $query);
-                $sql = "SELECT * FROM images WHERE user_id = '$userid' " . $logical_operation . " ";
+                $sql = "SELECT * FROM images WHERE user_id = '$userid' AND ";
                 $placeholders = "";
                 foreach($substrings as $substring)
                 {
