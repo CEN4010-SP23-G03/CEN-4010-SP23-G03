@@ -14,6 +14,7 @@ function set_thumbnail_callbacks_and_populate_tag_list(tags_arr, tags_set)
         taglist.html("");
         tags_set.forEach(function(value)
         {
+            // TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             taglist.append(
                 `
                     <li class="list-group-item">${value}</li>

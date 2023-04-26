@@ -28,7 +28,7 @@
 
     </head>
     <body>
-
+        <?php session_start(); ?>
         <!-- top area -->
         <nav class="navbar navbar-expand-lg fixed-top navbar-light bg-light">
             <div class="container-fluid">
@@ -93,19 +93,19 @@
                     <form class="d-flex mx-auto my-4 col-lg-6" id="control-form">
                         <?php
                         // check if user is logged in
-                        session_start();
-                        if (isset($_SESSION["user_id"]))
-                        {
-                            // the following buttons should only appear when user is signed in
-                            echo '<a href="logout.php" class="btn btn-light">Logout</a>';
-                            echo '<button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#save-new-image-modal">Save New Image</button>';
-                        }
-                        else
-                        {
-                            // the following buttons should only appear when user is logged out
-                            echo '<a href="create-account.php" class="btn btn-light">Create Account</a>';
-                            echo '<a href="login.php" class="btn btn-light">Log in</a>';
-                        }
+                        //session_start();
+                        //if (isset($_SESSION["user_id"]))
+                        //{
+                        //    // the following buttons should only appear when user is signed in
+                        //    echo '<a href="logout.php" class="btn btn-light">Logout</a>';
+                        //    echo '<button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#save-new-image-modal">Save New Image</button>';
+                        //}
+                        //else
+                        //{
+                        //    // the following buttons should only appear when user is logged out
+                        //    echo '<a href="create-account.php" class="btn btn-light">Create Account</a>';
+                        //    echo '<a href="login.php" class="btn btn-light">Log in</a>';
+                        //}
                         ?>
                     </form>
                     
@@ -291,22 +291,31 @@
 
                 $userid = $_SESSION["user_id"];
                 $query = $_POST["searchbox"];
+
+                $prefix = substr($query, 0, 3);
+                $logical_operation = "AND";
+                if($prefix == "OR:")
+                {
+                    $logical_operation = "OR";
+                }
                 
-                $substrings = explode("," $query);
-                $sql = "SELECT * FROM images WHERE user_id = '$userid' AND ";
+                $substrings = explode(",", $query);
+                $sql = "SELECT * FROM images WHERE user_id = '$userid' " . $logical_operation . " ";
                 $placeholders = "";
                 foreach($substrings as $substring)
                 {
-                    $placeholders .= "?, ";
+                    $placeholders .= "tags LIKE CONCAT('%', ?, '%') " . $logical_operation . " ";
                 }
-                $placeholders = rtrim($placeholders, ", ");
-                $sql .= "tags LIKE CONCAT('%', $placeholders, '%')";
+                $placeholders = rtrim($placeholders, " " . $logical_operation . " ");
+                $sql .= $placeholders;
                 $stmt = $db->prepare($sql);
 
-                $types = str_repeat("s", count($substrings));
-                $params = array_merge(array($types), $substrings);
-                call_user_func_array(array($stmt, 'bind_param'), $params);
-
+                $bind_params = array(str_repeat("s", count($substrings)));
+                foreach($substrings as $index => $substring) {
+                    $bind_params[] = &$substrings[$index];
+                }
+                call_user_func_array(array($stmt, 'bind_param'), $bind_params);
+                
                 $stmt->execute();
                 $results = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
