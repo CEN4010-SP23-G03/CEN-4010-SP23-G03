@@ -1,6 +1,8 @@
+body { padding-top: 120px;}
+
 #tags-column {
     position: fixed;
-    top: 0;
+    top: 80px;
     left: 0;
     bottom: 0;
     width:200px;

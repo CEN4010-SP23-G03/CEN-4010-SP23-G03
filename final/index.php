@@ -29,13 +29,66 @@
     </head>
     <body>
 
+        <!-- top area -->
+        <nav class="navbar navbar-expand-lg fixed-top navbar-light bg-light">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">
+                    <img src="logo.png" alt="Overview logo" height="50" class="d-inline-block align-text-top">
+                </a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                    <form>
+                        <div class="input-group">
+                            <!--<span class="input-group-text" id="basic-addon1">@</span>-->
+                            <ul class="navbar-nav">
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        Username
+                                    </a>
+                                    <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                                        <li><a class="dropdown-item" href="#">Action</a></li>
+                                        <li><a class="dropdown-item" href="#">Another action</a></li>
+                                        <li><a class="dropdown-item" href="#">Something else here</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </form>
+                    
+                    <div class="container">
+                        <form class="mx-auto" id="search-form" method="post" action="index.php">
+                            <div class="input-group">
+                                <input type="text" class="form-control me-2" id="search-box" placeholder="Find images with a given tag" name="searchbox">
+                                <button class="btn btn-primary" id="search-button" type="submit">Search</button>
+                            </div>    
+                        </form>
+                    </div>
+                </div>
+
+                
+                
+
+            
+            
+            </div>
+            
+        </nav>
+
+
+
+        <!-- former top area -->
+
+        <!--
         <div class="container">
             <div class="row">
                 <div class="col-12 sticky-top">
                     <form class="d-flex mx-auto my-4 col-lg-6" id="search-form" method="post" action="index.php">
                         <input type="text" class="form-control" id="search-box" placeholder="Find images with a given tag" name="searchbox">
                         <button class="btn btn-primary" id="search-button" type="submit">Search</button>
-                        <!-- <button class="btn btn-secondary" id="everything-button">See everything</button> -->
                     </form>
                     <form class="d-flex mx-auto my-4 col-lg-6" id="control-form">
                         <?php
@@ -59,6 +112,7 @@
                 </div>
             </div>
         </div>
+        -->
 
         <!-- Save New Image Modal -->
         <div class="modal fade" id="save-new-image-modal" tabindex="-1" aria-labelledby="save-new-image-modal-label" aria-hidden="true">
@@ -116,21 +170,24 @@
         </div>
 
         <!-- Tags column -->
+        
         <div class="container">
             <div class="row">
                 <div class="col-md-3">
                     <div id="tags-column">
                         <div class="card">
                             <div class="card-body">
-                                <h2 class="card-title">Tags</h2>
+                                <h4 class="card-title">Tags</h4>
                                 <ul class="list-group tag-list" id="the-tag-list">
-                                    <!-- generated from thumbnail-grid.js -->
+                                    <button type="button" class="btn btn-outline-primary" id="tag-list-item-0">tag item</button>
+                                    <button type="button" class="btn btn-outline-primary" id="tag-list-item-1">tag item 2</button>
                                 </ul>
                             </div>
                         </div>
                     </div>
                 </div>
         </div>
+
 
         <!-- Thumbnail grid -->
         <div class="container-fluid">
@@ -143,6 +200,31 @@
         </div>
 
         <script>validate_image_url();</script>
+        <script>
+            for(let i = 0; i < 2; i++)
+            {
+                let taglist_item = $("#tag-list-item-" + i.toString());
+                taglist_item.off().on("click", function(event)
+                {
+                    event.stopPropagation();
+                    
+                    let tag = taglist_item.text();
+                    console.log(tag);
+                    let searchbox = $("#search-box");
+                    let current_str = searchbox.val();
+                    if(current_str)
+                    {
+                        searchbox.val(current_str + ", " + tag);
+                    }
+                    else
+                    {
+                        searchbox.val(tag);
+                    }
+                    
+                    //$("#search-box").val(tag);
+                });
+            }
+        </script>
 
         <!-- php -->
         <?php
@@ -169,29 +251,11 @@
                 $userid = $_SESSION["user_id"]; // matches user_id found in SQL DB
 
                 // get sha256 hash of image found at url and filename based on url
-                $image_sha256 = hash('sha256', file_get_contents($image_url)); // seems to return the same value each time
-                //if (!$db->execute_query('INSERT INTO images (user_id, image_hash, url, tags) VALUES (?, ?, ?, ?)', [$userid, $image_sha256, $image_url, $image_tags]))
-                //{
-                //    echo 'Error when inserting: ' . mysqli_error($db);
-                //}
+                $image_sha256 = hash('sha256', file_get_contents($image_url));
 
                 $stmt = $db->prepare('INSERT INTO images (user_id, image_hash, url, tags) VALUES (?, ?, ?, ?)');
                 $stmt->bind_param('isss', $userid, $image_sha256, $image_url, $image_tags);
                 $stmt->execute();
-                
-                
-                // get image from DB for display to the user and call js funcs
-                //$result = $db->execute_query('SELECT * FROM images WHERE user_id = ? AND WHERE url = ?', [$userid, $image_url]);
-
-                $stmt = $db->prepare('SELECT * FROM images WHERE user_id = ? AND WHERE url = ?');
-                $stmt->bind_param('is', $userid, $image_url);
-                $stmt->execute();
-                $result = $stmt->get_result();
-                $rows = array();
-                while($row = $result->fetch_assoc()) { $rows[] = $row; }
-                if (!$rows) { echo "<script>console.log('rows php variable was empty!');</script>"; }
-
-                $query = "url:" . $image_url;
 
                 $b64 = base64_encode(json_encode($rows));
                 echo '<script>set_notification_success();</script>';
@@ -227,16 +291,38 @@
 
                 $userid = $_SESSION["user_id"];
                 $query = $_POST["searchbox"];
+                
+                $substrings = explode("," $query);
+                $sql = "SELECT * FROM images WHERE user_id = '$userid' AND ";
+                $placeholders = "";
+                foreach($substrings as $substring)
+                {
+                    $placeholders .= "?, ";
+                }
+                $placeholders = rtrim($placeholders, ", ");
+                $sql .= "tags LIKE CONCAT('%', $placeholders, '%')";
+                $stmt = $db->prepare($sql);
 
-                $stmt = $db->prepare('SELECT * FROM images WHERE user_id = ? AND tags LIKE %?%');
-                $stmt->bind_param('is', $userid, $query);
+                $types = str_repeat("s", count($substrings));
+                $params = array_merge(array($types), $substrings);
+                call_user_func_array(array($stmt, 'bind_param'), $params);
+
                 $stmt->execute();
-                $result = $stmt->get_result();
-                $rows = array();
-                while($row = $result->fetch_assoc()) { $rows[] = $row; }
-                if (!$rows) { echo "<script>console.log('rows php variable was empty!');</script>"; }
+                $results = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+                
+
+                
+                //$querysql = "%" . $query . "%";
+                //$stmt = $db->prepare('SELECT * FROM images WHERE user_id = ? AND tags LIKE ?');
+                //$stmt->bind_param('is', $userid, $querysql);
+                //$stmt->execute();
+                //$result = $stmt->get_result();
+                //$rows = array();
+                //while($row = $result->fetch_assoc()) { $rows[] = $row; }
+                //if (!$rows) { echo "<script>console.log('rows php variable was empty!');</script>"; }
     
-                $b64 = base64_encode(json_encode($rows));
+                $b64 = base64_encode(json_encode($results));
                 echo "<script>process_sql('$b64', '$query');</script>";
             }   
         }

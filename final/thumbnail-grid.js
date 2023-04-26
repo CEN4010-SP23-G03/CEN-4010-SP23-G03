@@ -1,15 +1,18 @@
+console.log("hello from thumbnail-grid");
+
 // displays tag list for associated image when thumbnail is clicked
 function set_thumbnail_callbacks_and_populate_tag_list(tags_arr, tags_set)
 {
-    // TODO: when clicking off a thumbnail (clicking on whitespace), show all tags for all listed images
     var thumbnail_grid = $("#thumbnail-grid");
+    var thumbnails = $(".card-img-top");
+
+
     thumbnail_grid.off().on("click", function(event)
     {
         console.log("thumbnail grid whitespace clicked");
         let taglist = $("#the-tag-list");
         taglist.html("");
-
-        tags_set.foreach(function(value)
+        tags_set.forEach(function(value)
         {
             taglist.append(
                 `
@@ -17,13 +20,9 @@ function set_thumbnail_callbacks_and_populate_tag_list(tags_arr, tags_set)
                 `
             );
         });
-
-        
-        
     });
     
     
-    var thumbnails = $(".card-img-top");
     thumbnails.each(function(index)
     {
         let thumbnail_manage_button = $("#thumb-manage-button-id-" + index.toString());
@@ -32,6 +31,7 @@ function set_thumbnail_callbacks_and_populate_tag_list(tags_arr, tags_set)
 
         thumbnail.off().on("click", function(event)
         {
+            event.stopPropagation();    // otherwise the thumbnail_grid callback will happen
             console.log(index);
             let taglist = $("#the-tag-list");
             taglist.html("");
@@ -39,10 +39,32 @@ function set_thumbnail_callbacks_and_populate_tag_list(tags_arr, tags_set)
             {
                 taglist.append(
                     `
-                        <li class="list-group-item">${tags_arr[index][i]}</li>
+                        <button type="button" class="btn btn-outline-primary" id="tag-list-item-${i.toString()}">${tags_arr[index][i]}</button>
                     `
                 );
             }
+
+            for(let i = 0; i < tags_arr[index].length; i++)
+            {
+                let taglist_item = $("#tag-list-item-" + i.toString());
+                taglist_item.off().on("click", function(event)
+                {
+                    event.stopPropagation();
+                    let tag = taglist_item.text();
+                    console.log(tag);
+                    let searchbox = $("#search-box");
+                    let current_str = searchbox.val();
+                    if(current_str)
+                    {
+                        searchbox.val(current_str + ", " + tag);
+                    }
+                    else
+                    {
+                        searchbox.val(tag);
+                    }
+                });
+            }
+
         });
 
         // set a callback for this button that will autopopulate modal field with image url when modal is launched (launched using same button)
