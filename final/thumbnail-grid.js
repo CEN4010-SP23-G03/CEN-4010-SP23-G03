@@ -1,5 +1,42 @@
 console.log("hello from thumbnail-grid");
 
+function show_taglist_and_set_callbacks_once(tags_set)
+{
+    let taglist = $("#the-tag-list");
+    let counter = 0;
+    taglist.html("");
+    tags_set.forEach(function(value)
+    {
+        taglist.append(
+            `
+                <button type="button" class="btn btn-outline-primary" id="tag-list-item-${counter.toString()}">${value}</button>
+            `
+        );
+        counter = counter + 1;
+    });
+
+    for(let i = 0; i < tags_set.size; i++)
+        {
+            let taglist_item = $("#tag-list-item-" + i.toString());
+            taglist_item.off().on("click", function(event)
+            {
+                event.stopPropagation();
+                let tag = taglist_item.text();
+                console.log(tag);
+                let searchbox = $("#search-box");
+                let current_str = searchbox.val();
+                if(current_str)
+                {
+                    searchbox.val(current_str + ", " + tag);
+                }
+                else
+                {
+                    searchbox.val(tag);
+                }
+            });
+        }
+}
+
 // displays tag list for associated image when thumbnail is clicked
 function set_thumbnail_callbacks_and_populate_tag_list(tags_arr, tags_set)
 {
@@ -11,16 +48,38 @@ function set_thumbnail_callbacks_and_populate_tag_list(tags_arr, tags_set)
     {
         console.log("thumbnail grid whitespace clicked");
         let taglist = $("#the-tag-list");
+        let counter = 0;
         taglist.html("");
         tags_set.forEach(function(value)
         {
-            // TODO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             taglist.append(
                 `
-                    <li class="list-group-item">${value}</li>
+                    <button type="button" class="btn btn-outline-primary" id="tag-list-item-${counter.toString()}">${value}</button>
                 `
             );
+            counter = counter + 1;
         });
+
+        for(let i = 0; i < tags_set.size; i++)
+        {
+            let taglist_item = $("#tag-list-item-" + i.toString());
+            taglist_item.off().on("click", function(event)
+            {
+                event.stopPropagation();
+                let tag = taglist_item.text();
+                console.log(tag);
+                let searchbox = $("#search-box");
+                let current_str = searchbox.val();
+                if(current_str)
+                {
+                    searchbox.val(current_str + ", " + tag);
+                }
+                else
+                {
+                    searchbox.val(tag);
+                }
+            });
+        }
     });
     
     

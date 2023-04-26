@@ -28,7 +28,11 @@
 
     </head>
     <body>
-        <?php 
+        <?php
+        ini_set('display_errors', 1);
+        ini_set('display_startup_errors', 1);
+        error_reporting(E_ALL);
+        mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
         session_start();
         $db_host = "localhost";
         $db_username = "cen4010sp23g03";
@@ -36,6 +40,7 @@
         $db_name = "cen4010sp23g03";
         $db = mysqli_connect($db_host, $db_username, $db_password, $db_name);
         if (!$db) { die("No connection to MySQL database!" . mysqli_connect_error()); }
+        
         ?>
         <!-- top area -->
         <nav class="navbar navbar-expand-lg fixed-top navbar-light bg-light">
@@ -49,7 +54,7 @@
                 <div class="collapse navbar-collapse" id="navbarNavDropdown">
                     <form>
                         <div class="input-group">
-                            <!--<span class="input-group-text" id="basic-addon1">@</span>-->
+                            <span class="input-group-text" id="basic-addon1">@</span>
                             <ul class="navbar-nav">
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -57,10 +62,15 @@
                                         if (isset($_SESSION["user_id"]))
                                         {
                                             $userid = $_SESSION["user_id"];
-                                            $stmt = $db->prepare("SELECT username FROM user_accounts WHERE user_id = '$userid'");
-                                            $stmt->execute();
-                                            $results = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-                                            echo $results["username"];
+                                            $result = mysqli_query($db, "SELECT username FROM user_accounts WHERE user_id = '$userid'");
+                                            if ($row = mysqli_fetch_assoc($result)) 
+                                            {
+                                                echo $row["username"];
+                                            }
+                                            else
+                                            {
+                                                echo "username";
+                                            }
                                         }
                                         ?>
                                     </a>
@@ -83,40 +93,6 @@
                 </div>
             </div>
         </nav>
-
-        <!-- former top area -->
-
-        <!--
-        <div class="container">
-            <div class="row">
-                <div class="col-12 sticky-top">
-                    <form class="d-flex mx-auto my-4 col-lg-6" id="search-form" method="post" action="index.php">
-                        <input type="text" class="form-control" id="search-box" placeholder="Find images with a given tag" name="searchbox">
-                        <button class="btn btn-primary" id="search-button" type="submit">Search</button>
-                    </form>
-                    <form class="d-flex mx-auto my-4 col-lg-6" id="control-form">
-                        <?php
-                        // check if user is logged in
-                        //session_start();
-                        //if (isset($_SESSION["user_id"]))
-                        //{
-                        //    // the following buttons should only appear when user is signed in
-                        //    echo '<a href="logout.php" class="btn btn-light">Logout</a>';
-                        //    echo '<button type="button" class="btn btn-light" data-bs-toggle="modal" data-bs-target="#save-new-image-modal">Save New Image</button>';
-                        //}
-                        //else
-                        //{
-                        //    // the following buttons should only appear when user is logged out
-                        //    echo '<a href="create-account.php" class="btn btn-light">Create Account</a>';
-                        //    echo '<a href="login.php" class="btn btn-light">Log in</a>';
-                        //}
-                        ?>
-                    </form>
-                    
-                </div>
-            </div>
-        </div>
-        -->
 
         <!-- Save New Image Modal -->
         <div class="modal fade" id="save-new-image-modal" tabindex="-1" aria-labelledby="save-new-image-modal-label" aria-hidden="true">
@@ -183,8 +159,7 @@
                             <div class="card-body">
                                 <h4 class="card-title">Tags</h4>
                                 <ul class="list-group tag-list" id="the-tag-list">
-                                    <button type="button" class="btn btn-outline-primary" id="tag-list-item-0">tag item</button>
-                                    <button type="button" class="btn btn-outline-primary" id="tag-list-item-1">tag item 2</button>
+                                    <!-- tag list generated by thumbnail-grid.js -->
                                 </ul>
                             </div>
                         </div>
@@ -204,31 +179,6 @@
         </div>
 
         <script>validate_image_url();</script>
-        <script>
-            for(let i = 0; i < 2; i++)
-            {
-                let taglist_item = $("#tag-list-item-" + i.toString());
-                taglist_item.off().on("click", function(event)
-                {
-                    event.stopPropagation();
-                    
-                    let tag = taglist_item.text();
-                    console.log(tag);
-                    let searchbox = $("#search-box");
-                    let current_str = searchbox.val();
-                    if(current_str)
-                    {
-                        searchbox.val(current_str + ", " + tag);
-                    }
-                    else
-                    {
-                        searchbox.val(tag);
-                    }
-                    
-                    //$("#search-box").val(tag);
-                });
-            }
-        </script>
 
         <!-- php -->
         <?php
@@ -291,7 +241,7 @@
                 $b64 = "";
                 if ($query == "user:all")
                 {
-                    $stmt = $db->prepare('SELECT * FROM images WHERE user_id = '$userid' LIMIT 15');
+                    $stmt = $db->prepare("SELECT * FROM images WHERE user_id = '$userid' LIMIT 15");
                     $stmt->execute();
                     $results = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                     $b64 = base64_encode(json_encode($results));                    
@@ -327,7 +277,8 @@
                     $results = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                     $b64 = base64_encode(json_encode($results));
                 }
-                echo "<script>process_sql('$b64', '$query');</script>";
+                $original_query = $_POST["searchbox"];
+                echo "<script>process_sql('$b64', '$original_query');</script>";
             }   
         }
         else if(isset($_SESSION["user_id"]))

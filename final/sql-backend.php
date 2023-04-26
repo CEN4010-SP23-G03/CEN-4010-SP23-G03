@@ -29,6 +29,7 @@ function process_sql(b64, user_query_string)
 
     // pass data off to thumbnail-grid
     show_thumbnails(images_arr, tags_arr, tags_set);
+    show_taglist_and_set_callbacks_once(tags_set);
 
     // repopulate search box with user query
     var searchbox = $("#search-box");
