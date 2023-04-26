@@ -16,25 +16,25 @@ function show_taglist_and_set_callbacks_once(tags_set)
     });
 
     for(let i = 0; i < tags_set.size; i++)
+    {
+        let taglist_item = $("#tag-list-item-" + i.toString());
+        taglist_item.off().on("click", function(event)
         {
-            let taglist_item = $("#tag-list-item-" + i.toString());
-            taglist_item.off().on("click", function(event)
+            event.stopPropagation();
+            let tag = taglist_item.text();
+            console.log(tag);
+            let searchbox = $("#search-box");
+            let current_str = searchbox.val();
+            if(current_str)
             {
-                event.stopPropagation();
-                let tag = taglist_item.text();
-                console.log(tag);
-                let searchbox = $("#search-box");
-                let current_str = searchbox.val();
-                if(current_str)
-                {
-                    searchbox.val(current_str + ", " + tag);
-                }
-                else
-                {
-                    searchbox.val(tag);
-                }
-            });
-        }
+                searchbox.val(current_str + ", " + tag);
+            }
+            else
+            {
+                searchbox.val(tag);
+            }
+        });
+    }
 }
 
 // displays tag list for associated image when thumbnail is clicked
