@@ -21,7 +21,7 @@ function show_taglist_and_set_callbacks_once(tags_set)
         taglist_item.off().on("click", function(event)
         {
             event.stopPropagation();
-            let tag = taglist_item.text();
+            let tag = taglist_item.text().trim();
             console.log(tag);
             let searchbox = $("#search-box");
             let current_str = searchbox.val();
@@ -66,7 +66,7 @@ function set_thumbnail_callbacks_and_populate_tag_list(tags_arr, tags_set)
             taglist_item.off().on("click", function(event)
             {
                 event.stopPropagation();
-                let tag = taglist_item.text();
+                let tag = taglist_item.text().trim();
                 console.log(tag);
                 let searchbox = $("#search-box");
                 let current_str = searchbox.val();
@@ -110,7 +110,7 @@ function set_thumbnail_callbacks_and_populate_tag_list(tags_arr, tags_set)
                 taglist_item.off().on("click", function(event)
                 {
                     event.stopPropagation();
-                    let tag = taglist_item.text();
+                    let tag = taglist_item.text().trim();
                     console.log(tag);
                     let searchbox = $("#search-box");
                     let current_str = searchbox.val();
