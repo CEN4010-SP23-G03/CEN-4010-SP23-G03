@@ -29,18 +29,22 @@
     </head>
     <body>
         <?php
-        ini_set('display_errors', 1);
-        ini_set('display_startup_errors', 1);
-        error_reporting(E_ALL);
-        mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+        //ini_set('display_errors', 1);
+        //ini_set('display_startup_errors', 1);
+        //error_reporting(E_ALL);
+        //mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
         session_start();
+        if(!isset($_SESSION["user_id"]))
+        {
+            header('Location: login.php');
+            exit;
+        }
         $db_host = "localhost";
         $db_username = "cen4010sp23g03";
         $db_password = "ASpring#2023";
         $db_name = "cen4010sp23g03";
         $db = mysqli_connect($db_host, $db_username, $db_password, $db_name);
         if (!$db) { die("No connection to MySQL database!" . mysqli_connect_error()); }
-        
         ?>
         <!-- top area -->
         <nav class="navbar navbar-expand-lg fixed-top navbar-light bg-light">

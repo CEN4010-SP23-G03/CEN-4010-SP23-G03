@@ -1,4 +1,5 @@
 <?php
+session_start();
 if(isset($_SESSION["user_id"]))
 {
 	header('Location: overview.php');
@@ -6,7 +7,8 @@ if(isset($_SESSION["user_id"]))
 }
 else
 {
-    header('location: login.php')
+    header('location: login.php');
+    exit;
 }
 ?>
 <!doctype html>
