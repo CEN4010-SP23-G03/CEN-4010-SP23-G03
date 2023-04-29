@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>Demo (Hello world edition)</title>
+        <title>Overview</title>
 
         <link href="vendor/bootstrap.min.css" rel="stylesheet">
         <link href="ui.css" rel="stylesheet">
