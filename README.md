@@ -12,3 +12,5 @@ https://www.youtube.com/watch?v=DLqvRQuss40
 Vertical Prototype Demonstration Video:
 https://www.youtube.com/watch?v=uBJVpBb-lmw
 
+Final Presentation Video:
+https://www.youtube.com/watch?v=CPBXPWQdXFE
