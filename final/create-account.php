@@ -61,7 +61,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST")
 				    <h4>Create an account</h4>
 				  </div>
 					<!-- Form -->
-					<form class="px-3">
+					<form class="px-3" method="post">
 						<!-- Input Box -->
 						<div class="form-input">
 							<span><i class="fa fa-user-o"></i></span>
