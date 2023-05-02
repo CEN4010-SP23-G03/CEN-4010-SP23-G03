@@ -1,0 +1,13 @@
+--------------------------------------------------------------------------
+--- Milestone 5 ---
+
+[done - needs testing] repopulate search box with user query after post operation is complete (QOL)
+
+[done - needs testing] TODO on thumbnail-grid.js (line 6): when clicking off a thumbnail (clicking on whitespace), show all tags for all listed images (QOL)
+
+[done - needs testing] show a success message to user when an image is saved (QOL)
+	also shows newly saved image after save operation completes
+
+[done - needs testing] show a range of thumbnails by default
+
+[done - needs testing] fix sql calls to be safe from sql injection attacks

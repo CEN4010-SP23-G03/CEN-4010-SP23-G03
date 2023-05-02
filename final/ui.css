@@ -1,0 +1,16 @@
+body { padding-top: 120px;}
+
+#tags-column {
+    position: fixed;
+    top: 80px;
+    left: 0;
+    bottom: 0;
+    width:200px;
+    background-color: #f8f9fa;
+    overflow-y: scroll;
+  }
+  
+  
+  #thumbnail-grid {
+    margin-left: 15%;
+  } 
